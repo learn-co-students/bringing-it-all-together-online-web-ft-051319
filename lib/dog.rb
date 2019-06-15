@@ -34,4 +34,35 @@ class Dog
    new_dog
  end
 
+ def self.create(hash)
+   new_dog = Dog.new(hash)
+   new_dog.save
+   new_dog
+ end
+
+ def self.find_by_id(num)
+   sql = <<-SQL
+   SELECT *
+   FROM dogs
+   WHERE id = ?
+   SQL
+   dog = DB[:conn].execute(sql, num)[0]
+   new_dog = Dog.new(id: dog[0], name: dog[1], breed: dog[2])
+ end
+
+ def self.find_or_create_by(hash)
+   sql = <<-SQL
+   SELECT * FROM dogs
+   WHERE name = ? AND breed = ?
+   SQL
+   dog = DB[:conn].execute(sql,self.name, self.breed)
+    if !dog.empty?
+      dog_data = dog[0]
+      dog = Dog.new(id: dog[0], name: dog[1], breed: dog[2])
+    else
+      dog = self.create(hash)
+    end
+    dog
+  end
+
 end
